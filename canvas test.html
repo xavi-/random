@@ -1,0 +1,48 @@
+<html>
+ <head>
+	<style type="text/css">
+		#canvas
+		{
+			position:absolute;
+			left:100px; 
+			top:100px;
+		}
+		
+		canvas
+		{
+			border: 1px solid black;
+		}
+	</style>
+  <script type="application/x-javascript">
+    function draw() {
+      var canvas = document.getElementById("canvas");
+      if (canvas.getContext) {
+        var ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "rgba(200,0,0, 0.5)";
+        ctx.fillRect (10, 10, 55, 50);
+
+        ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+        ctx.fillRect (30, 30, 55, 50);
+      }
+    }
+		
+		var down = false;
+		
+		function moveBox(id, e)
+		{
+			if(down)
+			{
+				newDiv = document.getElementById(id);
+				newDiv.style.left = (e.clientX - 50) + "px";
+				newDiv.style.top = (e.clientY - 50) + "px";
+			}
+		}
+  </script>
+ </head>
+ <body onload="draw();">
+   <canvas id="canvas" width="150" height="150" onmouseup="down=false" onmousedown="down=true" onmousemove="moveBox('canvas', event)" ></canvas>
+	 
+	 some crap
+ </body>
+</html>

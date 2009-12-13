@@ -1,0 +1,496 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<style type="text/css">
+    .sortDisplay div.displayNumber
+    {
+        clear: both;
+        float: left;
+        height: 0.125em;
+        border: 1px solid white;
+        border-bottom: 0px solid white; 
+        background: black;
+        overflow: hidden;
+    }
+        
+    .sortDisplay
+    {
+        float: left;
+    }
+    
+    .sort
+    {
+        float: left;
+        width: 11.5em;
+        margin: 5px;
+    }
+    
+    .animation-controls 
+    {
+        float: left;
+        clear: both;
+        margin-top: 5px;
+    }
+    
+    .animation-controls .button
+    {
+        float: left;
+        border: 1px solid black;
+        cursor: pointer;
+        width: 4em;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+    <div class="sort">
+        <div id="bubble"></div>
+        <div id="bubbleControl"></div>
+    </div>
+    
+    <div class="sort">
+        <div id="selection"></div>
+        <div id="selectionControl"></div>
+    </div>
+    
+    <div class="sort">
+        <div id="quick"></div>
+        <div id="quickControl"></div>
+    </div>
+    
+    <div class="sort">
+        <div id="heap"></div>
+        <div id="heapControl"></div>
+    </div>
+    
+    <div class="sort">
+        <div id="merge"></div>
+        <div id="mergeControl"></div>
+    </div>
+<script>
+Array.prototype.clone = function()
+{
+    var clone = [];
+    
+    for(var i = this.length - 1; i >= 0; i--)
+        clone[i] = this[i];
+    
+    return clone;
+};
+
+var animation = {};
+
+animation.sequence = function(thunks, delay)
+{
+    var that = this;
+    var sequence = [];
+    
+    var playIndex = 0;
+    var running = false;
+    
+    function playEngine()
+    {
+        if(!running) return;
+        
+        sequence[playIndex++]();
+        
+        if(playIndex < sequence.length)
+            window.setTimeout(playEngine, that.delay);
+        else
+        {
+            running = false;
+            playIndex = 0;
+        }
+    }
+    
+    this.addThunk = function(thunk)
+    {
+        sequence.push(thunk);
+    };
+    
+    this.clear = function()
+    {
+        sequence = [];
+    };
+    
+    this.play = function()
+    {
+        running = true;
+        playEngine();
+    };
+    
+    this.reset = function()
+    {
+        running = false;
+        playIndex = 0;
+        sequence[0]();
+    };
+    
+    this.togglePlay = function()
+    {
+        running = !running;
+        playEngine();
+    };
+    
+    this.jumpTo = function(step)
+    {
+        running = false;
+        playIndex = step;
+        
+        if(playIndex < 0) playIndex = 0;
+        if(playIndex >= sequence.length) playIndex = sequence.length - 1;
+        
+        sequence[playIndex]();
+    };
+    
+    this.delay = delay;
+};
+
+animation.control = function(id, aniSeq)
+{
+    var that = this;
+    this.pause = function() { aniSeq.togglePlay(); };
+    this.stepForward = function() { aniSeq.jumpStep(1); };
+    this.stepBack = function() { aniSeq.jumpStep(-1); };
+    
+    (function()
+    {
+        var controls = document.getElementById(id);
+        var buttons = [{text: "play", func: that.play},
+                        {text: "pause", func: that.pause}, 
+                        {text: "stop", func: that.stop}, 
+                        {text: "step back", func: that.stepBack}, 
+                        {text: "step forward", func: that.stepForward}];
+        
+        controls.className = "animation-controls"
+        controls.innerHTML = "";
+        
+        for(var i = 0; i < buttons.length; i++)
+        {
+            var btn = document.createElement("div");
+            btn.className = "button";
+            btn.innerHTML = buttons[i].text;
+            btn.onclick = buttons[i].func;
+            
+            controls.appendChild(btn);
+        }
+        
+    })();
+};
+
+var sort = {};
+
+sort.recordableArray = function(elements)
+{
+    var stateRecord = [{numbers: elements.clone(), highLights: []}];
+    
+    this.lessThan = function(index1, index2)
+    {
+        var prevNumbers = stateRecord[stateRecord.length - 1].numbers;
+        var highLights = {};
+        highLights[index1] = 'blue';
+        highLights[index2] = 'blue';
+        stateRecord.push({numbers: prevNumbers, highLights: highLights});
+    
+        return elements[index1] < elements[index2];
+    };
+    
+    this.swap = function(index1, index2)
+    {
+        if(index1 === index2) return;
+    
+        var temp = elements[index1];
+        elements[index1] = elements[index2];
+        elements[index2] = temp;
+        
+        var highLights = {};
+        highLights[index1] = 'red';
+        highLights[index2] = 'red';
+        stateRecord.push({numbers: elements.clone(), highLights: highLights});
+    };
+    
+    this.currentRecord = stateRecord;
+    
+    this.length = elements.length;
+};
+
+sort.createSortDisplay = function(id, recordableArray, sorter)
+{
+    var display = [];
+    var aniSeq = new animation.sequence([], 50);
+    
+    function displayNumbers(numbers, highLights)
+    {
+        for(var i = numbers.length - 1, tempStyle; i >= 0; i--)
+        {
+            display[i].setLength(numbers[i]);
+            
+            if(!highLights) continue;
+            
+            tempStyle = display[i].style;
+            if(highLights[i])
+                tempStyle.backgroundColor = highLights[i];
+            else if(tempStyle.backgroundColor !== 'black')
+                tempStyle.backgroundColor = 'black';
+        }
+    }
+    
+    function displayThunk(numbers, highLights)
+    {
+        return function(){displayNumbers(numbers, highLights);};
+    }
+    
+    function runSort()
+    {
+        sorter(recordableArray);
+        
+        var record = recordableArray.currentRecord;
+        
+        for(var i = 0, leng = record.length; i < leng; i++)
+        {
+            aniSeq.addThunk(displayThunk(record[i].numbers, record[i].highLights));
+        }
+        aniSeq.addThunk(displayThunk(record[record.length - 1].numbers, []));
+    }
+    
+    //Constructor
+    (function()
+    {
+        var initElements = recordableArray.currentRecord[0].numbers;
+        var displayElem = document.getElementById(id);
+        var numWidth = 0.23;
+        
+        displayElem.innerHTML = "";
+        displayElem.className += " sortDisplay";        
+        displayElem.onclick = aniSeq.togglePlay;
+        
+        var lengthFunc = function(length)
+        {
+            if(this.length === length) return;
+            this.length = length;
+            this.style.width = length * numWidth + "em";
+        };
+        
+        var div;
+        for(var i = 0; i < initElements.length; i++)
+        {
+            div = document.createElement("div");
+            div.className = "displayNumber";
+            div.setLength = lengthFunc;
+            
+            display.push(div);
+            displayElem.appendChild(div);
+        }
+        
+        displayNumbers(initElements);
+        runSort();
+    })();
+    
+    return aniSeq;
+};
+
+//Sort function must be an "inplace sort" and must use a recordable Array
+(function()
+{
+    var bubbleSort = function(recordableArray)
+    {
+        for(var i = 0; i < recordableArray.length; i++)
+        {
+            var doneSwap = false;
+            for(var j = 0; j < recordableArray.length - i - 1; j++)
+            {
+                if(recordableArray.lessThan(j + 1,j))
+                {
+                    recordableArray.swap(j + 1, j);
+                    doneSwap = true;
+                }
+            }
+            
+            if(!doneSwap) break;
+        }
+    };
+    
+    var selectionSort = function(recordableArray)
+    {
+        for(var i = 0; i < recordableArray.length; i++)
+        {
+            var indMin = i;
+            
+            for(var j = i + 1; j < recordableArray.length; j++)
+            {
+                if(recordableArray.lessThan(j, indMin))
+                    indMin = j;
+            }
+            
+            recordableArray.swap(i, indMin);
+        }
+    };
+    
+    var quickSort = function(recordableArray)
+    {
+        var partition = function(lowInd, highInd)
+        {
+            var pivInd = lowInd;
+            var switchInd = lowInd + 1;
+            for(var i = lowInd + 1; i <= highInd; i++)
+            {
+                if(recordableArray.lessThan(i, pivInd))
+                    recordableArray.swap(switchInd++, i);
+            }
+            
+            recordableArray.swap(pivInd, switchInd - 1);
+            pivInd = switchInd - 1;
+            
+            return pivInd;
+        };
+        
+        var quickSortHelper = function(lowInd, highInd)
+        {
+            if(highInd - lowInd < 1) return;
+            
+            var pivInd = partition(lowInd, highInd);
+            quickSortHelper(lowInd, pivInd - 1);
+            quickSortHelper(pivInd + 1, highInd);
+        };
+        
+        quickSortHelper(0, recordableArray.length - 1);
+    };
+    
+    var heapSort = function(recordableArray)
+    {
+        var leftChild = function(parentInd){return parentInd * 2 + 1;};
+        var rightChild = function(parentInd){return parentInd * 2 + 2;};
+        var hasLeftChild = function(nodeInd, maxHeapInd){return leftChild(nodeInd) <= maxHeapInd;};
+        var hasRightChild = function(nodeInd, maxHeapInd){return rightChild(nodeInd) <= maxHeapInd;};
+        
+        var heapify = function(nodeInd, maxHeapInd)
+        {
+            if(nodeInd > maxHeapInd) return;
+            
+            var maxInd = nodeInd;
+            if(hasLeftChild(nodeInd, maxHeapInd) && 
+                    recordableArray.lessThan(maxInd, leftChild(nodeInd)))
+                maxInd = leftChild(nodeInd);
+            
+            if(hasRightChild(nodeInd, maxHeapInd) &&
+                    recordableArray.lessThan(maxInd, rightChild(nodeInd)))
+                maxInd = rightChild(nodeInd);
+            
+            if(maxInd === nodeInd) return;
+            
+            recordableArray.swap(nodeInd, maxInd);
+            heapify(maxInd, maxHeapInd);
+        };
+        
+        //building heap
+        for(var i = recordableArray.length / 2; i >= 0; i--)
+        {
+            heapify(i, recordableArray.length - 1);
+        }
+        
+        //Sorting
+        for(var maxHeapInd = recordableArray.length - 1; maxHeapInd > 0; maxHeapInd--)
+        {
+            heapify(0, maxHeapInd);
+            recordableArray.swap(0, maxHeapInd);
+        }
+    };
+    
+    var mergeSort = function(recordableArray)
+    {
+        var merge = function(a, b)
+        {
+            var abMerge = [];
+            var indA = 0, indB = 0;
+            
+            while(indA < a.length && indB < b.length)
+            {
+                if(recordableArray.lessThan(a[indA], b[indB]))
+                    abMerge.push(a[indA++]);
+                else
+                    abMerge.push(b[indB++]);
+            }
+            
+            var remainder = (indA < a.length ? a : b);
+            var remainderInd = (indA < a.length ? indA : indB);
+            while(remainderInd < remainder.length)
+            {
+                abMerge.push(remainder[remainderInd++]);
+            }
+            
+            return abMerge;
+        };
+        
+        var inLineSwaps = function(indList)
+        {
+            var offsetInd = indList[0];
+            for(var i = 1; i < indList.length; i++)
+            {
+                if(indList[i] < offsetInd)
+                    offsetInd = indList[i];
+            }
+            
+            for(var a = 0; a < indList.length - 1; a++)
+            {
+                if(indList[a] === -1) continue;
+                
+                var prev = a;
+                while(true) 
+                {
+                    var jump = indList[prev] - offsetInd;
+                    indList[prev] = -1;
+                    
+                    if(indList[jump] === -1) break;
+                    
+                    recordableArray.swap(prev + offsetInd, jump + offsetInd);
+                    prev = jump;
+                }
+            }
+        };
+        
+        var sort = function(indList)
+        {
+            if(indList.length <= 1) return indList;
+            var numCmp = function(a, b){return a - b;};
+            
+            var sortedA = sort(indList.slice(0, indList.length / 2));
+            inLineSwaps(sortedA.clone());
+            sortedA.sort(numCmp);
+            
+            var sortedB = sort(indList.slice(indList.length / 2, indList.length));
+            inLineSwaps(sortedB.clone()); 
+            sortedB.sort(numCmp);
+            
+            return merge(sortedA, sortedB);
+        };
+        
+        var indList = [];
+        for(var i = 0; i < recordableArray.length; i++)
+            indList.push(i);
+        
+        inLineSwaps(sort(indList));
+    };
+    
+    var list = [];
+    for(var i = 0; i < 50; i++)
+        list.push(50 * Math.random() + 1);
+    
+    var aniSeq;
+    aniSeq = sort.createSortDisplay('bubble', new sort.recordableArray(list.clone()), bubbleSort);
+    //new animation.control('bubbleControl', aniSeq);
+    
+    aniSeq = sort.createSortDisplay('selection', new sort.recordableArray(list.clone()), selectionSort);
+    //new animation.control('selectionControl', aniSeq);
+    
+    aniSeq = sort.createSortDisplay('quick', new sort.recordableArray(list.clone()), quickSort);
+    //new animation.control('quickControl', aniSeq);
+    
+    aniSeq = sort.createSortDisplay('heap', new sort.recordableArray(list.clone()), heapSort);
+    //new animation.control('heapControl', aniSeq);
+    
+    aniSeq = sort.createSortDisplay('merge', new sort.recordableArray(list.clone()), mergeSort);
+    //new animation.control('mergeControl', aniSeq);
+})();
+</script>
+</body>
+</html>

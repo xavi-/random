@@ -1,0 +1,35 @@
+<html>
+<head>
+  <style type="text/css">
+    img.line
+    {
+      left:20px;
+      top:20px;
+    }
+  </style>
+  <script type="application/x-javascript">
+    var rotVec = [-1, 1];
+    function makeRotateLine()
+    {
+      var rotLines = new Array(3);
+      
+      for(var i = 0; i < 3; i++)
+      {
+        var a = (i * 40) + 100;
+        
+        rotLines[i] = document.getElementById('rot-' + i);
+        rotLines[i].style.position = 'absolute';
+        rotLines[i].style.left = a + 'px';
+        rotLines[i].style.top = a + 'px';
+      }
+    }
+    
+  </script>
+</head>
+<body onload="makeRotateLine();">
+  <img class='line' id='rot-0' src='./rotate-pics/base-135.png'/>
+  <img class='line' id='rot-1' src='./rotate-pics/base-135.png'/>
+  <img class='line' id='rot-2' src='./rotate-pics/base-135.png'/>
+  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+</body>
+</html>

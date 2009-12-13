@@ -1,0 +1,83 @@
+<html>
+<head>
+  <style type="text/css">
+    #slant-box
+    {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      background: #0f0;
+      left: 10px;
+    }
+  </style>
+  <script type="text/javascript">
+    function getRelativePosition(id, e)
+    {
+      var relPos = {x: e.clientX, y: e.clientY};
+      var elem = document.getElementById(id);
+      
+      while(elem)
+      {
+        relPos.x -= elem.offsetLeft;
+        relPos.y -= elem.offsetTop;
+        elem = elem.offsetParent;
+      }
+      
+      relPos.x += document.body.scrollLeft;
+      relPos.y += document.body.scrollTop;
+      
+      return relPos;
+    }
+    
+    function clickCatcher(e)
+    {
+      var relPos = getRelativePosition("slant-box", e);
+      
+      var colorDiv = document.createElement("div");
+      colorDiv.style.position = 'absolute';
+      colorDiv.style.overflow = 'hidden';
+      colorDiv.style.left = relPos.x + 'px';
+      colorDiv.style.top = relPos.y + 'px';
+      colorDiv.style.width = '4px'; 
+      colorDiv.style.height = '4px';
+       
+      document.getElementById("text-box").innerHTML = relPos.x + ", " + relPos.y;
+      if(inSlant(relPos))
+      {
+        colorDiv.style.background = '#f00';
+      }
+      else 
+      {
+        colorDiv.style.background = '#00f';
+      }
+      
+      document.getElementById('slant-box').appendChild(colorDiv);
+    }
+    
+    function inSlant(e) 
+    {
+      var posVec = {x: 200, y: 200};
+      var widthVec = {x: 50, y: 50};
+      var heightVec = {x: 100, y: -70};
+      var userVec = {x: e.x, y: e.y};
+            
+      var det = widthVec.x * heightVec.y - widthVec.y * heightVec.x;
+      var weight = {w: (det < 0? -1:1), h: (det < 0? -1:1)};
+      det = Math.abs(det);
+      
+      weight.w *= (userVec.x - posVec.x) * heightVec.y
+                  +  (userVec.y - posVec.y) * -heightVec.x;
+      weight.h *= (userVec.x - posVec.x) * -widthVec.y
+                  + (userVec.y - posVec.y) * widthVec.x;
+      
+      return (weight.w > 0 && weight.h > 0) && (weight.w <= det && weight.h <= det);
+    }
+  </script>
+</head>
+<body>
+  <div id="text-box">mouse not in slant</div>
+  <div id="slant-box" onmousemove="clickCatcher(event)">
+    There's an invisible slant 
+  <div>
+</body>
+</html>
