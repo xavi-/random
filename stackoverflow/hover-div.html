@@ -1,0 +1,52 @@
+<html>
+<head runat="server">
+<title></title>
+<style type="text/css">
+    #ToolTip {
+        position:absolute; 
+        width: 200px;
+        background-color:Lime;
+        z-index:400;
+        visibility:hidden;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <div id="ToolTip">This is a test</div>
+        <a href="www.www.com">
+            <img alt="mg" id="base-img" border="0" src="http://www.google.com/logos/holiday09_4.gif" />
+        </a>
+
+    </div>
+    </form>
+<script language="javascript" type="text/javascript">
+    function showToolTip(e) {
+        e = e || window.event; // Older versions of IE handle events funny
+        // Added code that compensates for the window's scroll position.
+        var top = e.clientY + (window.pageYOffset || document.body.scrollTop) + 5;
+        moveToolTip("ToolTip", top, e.clientX);
+        document.getElementById('ToolTip').style.visibility = 'visible';
+        
+        // We need to cancel the center to ensure that the onmousemove event 
+        // on the body element doesn't get triggered
+        e.cancelBubble = true;
+        if (e.stopPropagation) { e.stopPropagation(); }
+    }
+    function hideToolTip() {
+        moveToolTip("ToolTip", 0, 0);
+        document.getElementById('ToolTip').style.visibility = 'hidden';
+    }
+
+    function moveToolTip(layerName, top, left) {
+        document.getElementById(layerName).style.top = (top + "px");
+    }
+    
+    document.onmousemove = hideToolTip;
+    document.getElementById("ToolTip").onmousemove = showToolTip;
+    document.getElementById("base-img").onmousemove = showToolTip;
+</script>
+</body>
+</html>
