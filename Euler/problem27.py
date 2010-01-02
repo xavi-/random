@@ -21,7 +21,7 @@ maxSeq = (0, 0, 0)
 primes = [i for i in range(2, 1000) if isPrime(i)]
 
 for b in primes:
-    for a in range(-999, 1000):
+    for a in range(-999, 1000, 2):
         seq = testExpression(a, b);
         
         if seq[0] > maxSeq[0]: maxSeq = seq
