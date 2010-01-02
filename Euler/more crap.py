@@ -987,21 +987,6 @@ def p50():
 
     print "ans:",biggestSpan
 
-#problem 52 --  NOT DONE
-def p52():
-    i = 10**10 # Try numbers > 10^9
-    oneToSix = [1, 2, 3, 4, 5, 6]
-
-    while True:
-        nums = map(lambda x: sorted(str(i * x)), oneToSix)
-
-        if reduce(lambda x, y: x == y, nums):
-            print "The answer: %d" % i
-            break
-        
-        if i % 4001 == 0: print i
-        i += 1
-
 #problem 53
 def p53():
     def choose(n, r):
