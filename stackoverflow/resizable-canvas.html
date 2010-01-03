@@ -1,0 +1,47 @@
+<html>
+<head>
+    <style>
+        #resizable {
+            position: absolute;
+            height: 100px;
+            width: 100px;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: green;
+        }
+        
+        .ui-resizable-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: 0px;
+            bottom: 0px;
+            background-color: blue;
+            cursor: nw-resize;
+        }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/jquery-ui.min.js"></script>
+</head>
+<body>
+<div id="resizable">
+    <canvas></canvas>
+</div>
+<script>
+    $(function() {
+        $("#resizable").resizable();
+        $("canvas").each(function() {
+            var c = this.getContext("2d");
+            var img = document.createElement("img");
+            
+            img.src = "http://www.google.com/intl/en_ALL/images/logo.gif";
+            
+            c.drawImage(img, 0, 0);
+        });
+    });
+</script>
+</body>
+</html>
