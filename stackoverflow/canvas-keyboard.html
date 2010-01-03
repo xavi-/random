@@ -1,0 +1,48 @@
+<html>
+<head>
+    <style type="text/css">
+        canvas
+        {
+            border: 1px solid black;
+            left: 100px;
+            top: 100px;
+            outline: none;
+        }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+	<div id="log"></div>
+<script>
+    function log(a) {
+        $("#log").append(a+"<br/>");
+    }
+    $(function() {
+        var $canvas = $("#canvas");
+        
+        $canvas
+            .attr("contentEditable", "true")
+            .mousedown(function(e){ $(this).focus(); log("mouse click"); return false; })
+            .keydown(function(e){ /* ... game logic ... */ log("key-press: " + e.keyCode); return false; });
+        
+        $canvas[0].contentEditable = true;
+        
+        var c = $canvas[0].getContext("2d");
+        var img = document.createElement("img");
+        
+        img.src = "http://www.google.com/intl/en_ALL/images/logo.gif";
+        
+        $(img).load(function() {
+            c.drawImage(img, 0, 0);
+            
+            c.fillStyle = "#FF00FF";
+            c.beginPath();
+            c.arc(100, 100, 40, 0, Math.PI, true);
+            c.closePath();
+            c.fill();
+        });
+    });
+</script>
+</body>
+</html>
