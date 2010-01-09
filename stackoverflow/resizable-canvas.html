@@ -4,7 +4,7 @@
         #resizable {
             position: absolute;
             height: 100px;
-            width: 100px;
+            width: 200px;
         }
         
         canvas {
@@ -39,7 +39,15 @@
             
             img.src = "http://www.google.com/intl/en_ALL/images/logo.gif";
             
-            c.drawImage(img, 0, 0);
+            $(img).load(function() {
+                c.drawImage(img, 0, 0);
+                
+                c.fillStyle = "#FF00FF";
+                c.beginPath();
+                c.arc(100, 100, 40, 0, Math.PI, true);
+                c.closePath();
+                c.fill();
+            });
         });
     });
 </script>
