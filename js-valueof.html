@@ -1,0 +1,14 @@
+<html>
+<head><title>JavaScript, valueOf, and type coercion</title></head>
+<body>
+Apparently you can screw with type coercion in javascript by overriding the <code>valueOf</code> function.  Here are some crazy examples:
+<pre><code>var a = { valueOf: function() { return 1; } };
+isNaN(a) === false // a is a Number!
+Number(a) // returns 1
+a == 1; // returns true
+a + 3; // return 4
++a; // returns 1
+</code></pre>
+JS is a cool language...
+</body>
+</html>
