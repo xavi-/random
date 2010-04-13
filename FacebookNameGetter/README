@@ -1,0 +1,47 @@
+This distribution includes the following files, which comprise the Java library for interacting with the Facebook API:
+ - com/facebook/api/FacebookRestClient.java -> main class of the library; your code should create an instance of this class and call its methods 
+ - com/facebook/api/FacebookMethod.java -> enumeration of methods
+ - com/facebook/api/FacebookException.java -> very simple exception class
+ - com/facebook/api/ProfileField.java -> enumeration of profile fields
+
+It also includes the following files showing example uses of the library:
+ - com/facebook/api/ExampleClient.java
+ - settings.conf
+
+To use the ExampleClient, edit settings.conf and replace the api_key and secret with your own, and make sure to add bin/BrowserLauncher2-10rc4.jar to your classpath (for example, via "java -cp bin/BrowserLauncher2-10rc4.jar").
+
+BrowserLauncher (http://browserlaunch2.sourceforge.net/) is distributed under the terms of the GNU Lesser General Public License (http://www.gnu.org/licenses/lgpl.html).
+                                                                            
+ +---------------------------------------------------------------------------+
+ | Facebook Development Platform Java Client                                 |
+ +---------------------------------------------------------------------------+
+ | Copyright (c) 2007 Facebook, Inc.                                         |
+ | All rights reserved.                                                      |
+ |                                                                           |
+ | Redistribution and use in source and binary forms, with or without        |
+ | modification, are permitted provided that the following conditions        |
+ | are met:                                                                  |
+ |                                                                           |
+ | 1. Redistributions of source code must retain the above copyright         |
+ |    notice, this list of conditions and the following disclaimer.          |
+ | 2. Redistributions in binary form must reproduce the above copyright      |
+ |    notice, this list of conditions and the following disclaimer in the    |
+ |    documentation and/or other materials provided with the distribution.   |
+ |                                                                           |
+ | THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR      |
+ | IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES |
+ | OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.   |
+ | IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,          |
+ | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT  |
+ | NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, |
+ | DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY     |
+ | THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT       |
+ | (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF  |
+ | THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.         |
+ +---------------------------------------------------------------------------+
+ | For help with this library, contact developers-help@facebook.com          |
+ +---------------------------------------------------------------------------+
+                                                                                                                             
+
+
+
