@@ -23,11 +23,9 @@
         var $canvas = $("#canvas");
         
         $canvas
-            .attr("contentEditable", "true")
+            .attr("tabindex", "0")
             .mousedown(function(e){ $(this).focus(); log("mouse click"); return false; })
             .keydown(function(e){ /* ... game logic ... */ log("key-press: " + e.keyCode); return false; });
-        
-        $canvas[0].contentEditable = true;
         
         var c = $canvas[0].getContext("2d");
         var img = document.createElement("img");
