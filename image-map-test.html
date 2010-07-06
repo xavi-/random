@@ -1,0 +1,50 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<style>
+    #board-screen {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        border: thin black solid; 
+        width: 500px;
+        height: 500px;
+        z-index: 10;
+    }
+    
+    div {
+        position: relative;
+    }
+    
+    #indicator {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100px;
+        height: 100px;
+        background-color: #00FF00;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+    This page tests whether or not the browser updates an image map after an <code>area</code> element has been changed by javascript.
+    <br/>
+    The green square should always be aligned with an area element.
+    <div>
+        <img id="board-screen" alt="board" src="pics/transparent.gif" usemap="#board-def" />
+        <map id="board-def" name="board-def">
+            <area id="area" shape="poly" coords="0,0,0,100,100,100,100,0" onclick="moveArea();"/>
+        </map>
+        <div id="indicator">Click to move</div>
+    </div>
+<script>
+function moveArea() {
+    document.getElementById("area").coords = "400,400,400,500,500,500,500,400";
+    document.getElementById("indicator").style.top = "400px";
+    document.getElementById("indicator").style.left = "400px";
+    alert("Area should now be at 400px, 400px");
+}
+</script>
+</body>
+</html>
