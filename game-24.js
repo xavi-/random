@@ -71,5 +71,21 @@ var makeCombinations = (function() {
     }
 })();
 
-exports.Stack = Stack;
-exports.makeCombinations = makeCombinations;
+
+var lookup = [], num = "";
+for(var i = 0; i < 1e4; i++) {
+    if(i < 1) { num = "AAAA"; }
+    else if(i < 10) { num = "AAA" + i; }
+    else if(i < 100) { num = "AA" + i; }
+    else if(i < 1000) { num = "A" + i; }
+    else { num = "" + i; }
+    
+    num = num.replace("0", "A").split("").map(function(n) { return parseInt(n, 11); });
+    lookup.push(makeCombinations(num)
+                    .filter(function(c) { return c.peek === 24; })
+                    .map(function(c) { return c.toString(); }));
+    
+    if(i % 234 === 0) { console.log(i); }
+}
+
+exports.lookup = lookup;
