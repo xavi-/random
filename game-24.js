@@ -18,6 +18,14 @@ Stack.prototype.push = function(val) {
     return new Stack(val, this);
 }
 
+Stack.prototype.toString = function() {
+    var temp = this, arr = [];
+    
+    while(!temp.isEmpty) { arr.push(temp.peek); temp = temp.pop; }
+    
+    return arr.join();
+}
+
 Stack.empty = (function() {
     var empty = new Stack(null, {});
     empty.pop = empty;
@@ -27,10 +35,10 @@ Stack.empty = (function() {
 })();
 
 var makeCombinations = (function() {
-    var ops = [ function multi(stack) { return stack.pop.pop.push(stack.peek * stack.pop.peek); }
-              , function add(stack) { return stack.pop.pop.push(stack.peek + stack.pop.peek); }
-              , function sub(stack) { return stack.pop.pop.push(stack.peek - stack.pop.peek); }
-              , function div(stack) { return stack.pop.pop.push(stack.peek / stack.pop.peek); } ];
+    var ops = [ function multi(stack) { return stack.pop.pop.push(stack.pop.peek * stack.peek); }
+              , function add(stack) { return stack.pop.pop.push(stack.pop.peek + stack.peek); }
+              , function sub(stack) { return stack.pop.pop.push(stack.pop.peek - stack.peek); }
+              , function div(stack) { return stack.pop.pop.push(stack.pop.peek / stack.peek); } ];
     
     function recurseFind(stack, numbers, path) {
         if(stack.pop.isEmpty && numbers.isEmpty) { return [ path.push(stack.peek) ]; }
