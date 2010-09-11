@@ -27,24 +27,10 @@ Stack.empty = (function() {
 })();
 
 var makeCombinations = (function() {
-    var ops = (function() {
-        var rawOps = [ function multi(a, b) { return a * b; }
-                     , function add(a, b) { return a + b; }
-                     , function sub(a, b) { return a - b; }
-                     , function div(a, b) { return a / b; } ];
-                     
-        return rawOps.map(function(op) {
-            var newOp = function(stack) {
-                var a = stack.peek, b = stack.pop.peek;
-                
-                return stack.pop.pop.push(op(a, b));
-            };
-            
-            newOp.opName = op.name;
-            
-            return newOp;
-        });
-    })();
+    var ops = [ function multi(stack) { return stack.pop.pop.push(stack.peek * stack.pop.peek); }
+              , function add(stack) { return stack.pop.pop.push(stack.peek + stack.pop.peek); }
+              , function sub(stack) { return stack.pop.pop.push(stack.peek - stack.pop.peek); }
+              , function div(stack) { return stack.pop.pop.push(stack.peek / stack.pop.peek); } ];
     
     function recurseFind(stack, numbers, path) {
         if(stack.pop.isEmpty && numbers.isEmpty) { return [ path.push(stack.peek) ]; }
@@ -60,7 +46,7 @@ var makeCombinations = (function() {
         var paths = [];
 
         ops.forEach(function(op) {
-            Array.prototype.push.apply(paths, recurseFind(op(stack), numbers, path.push(op.opName)));
+            Array.prototype.push.apply(paths, recurseFind(op(stack), numbers, path.push(op.name)));
         });
         if(numbers.isEmpty) { return paths; }
         
