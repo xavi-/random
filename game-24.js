@@ -1,3 +1,51 @@
+/* Results
+// basic: + - / *
+  148/715
+// basic, pow 
+  126/715
+// basic, mod
+  112/715
+// basic, min/max
+  113/715
+// basic, pow, min/max
+  103/715
+// basic, mod, min/max
+  105/715
+// with basic, pow, mod
+  97/715
+// basic, pow, mod, min/max
+  92/715
+// boolean: & ^ |
+  715/715
+// boolean, pow, mod, min/max
+  638/715
+// with basic, boolean
+  56/715
+// with basic, pow, boolean
+  49/715
+// with basic, mod, boolean
+  50/715
+// basic, pow, min/max, boolean
+  46/715
+// basic, mod, min/max, boolean
+  49/715
+// with basic, pow, mod, boolean
+  45/715
+// with basic, pow, mod, boolean, min/max
+  44/715
+  
+
+// with pow
+  715/715
+// with mod
+  715/715
+// with min/max
+  715/715
+
+// with pow, mod, min/max
+  715/715
+*/
+
 function Stack(head, tail) {
     if(arguments.length === 0) { return Stack.empty; }
     
@@ -38,7 +86,14 @@ var makeCombinations = (function() {
     var ops = [ function multi(stack) { return stack.pop.pop.push(stack.pop.peek * stack.peek); }
               , function add(stack) { return stack.pop.pop.push(stack.pop.peek + stack.peek); }
               , function sub(stack) { return stack.pop.pop.push(stack.pop.peek - stack.peek); }
-              , function div(stack) { return stack.pop.pop.push(stack.pop.peek / stack.peek); } ];
+              , function div(stack) { return stack.pop.pop.push(stack.pop.peek / stack.peek); }
+              , function mod(stack) { return stack.pop.pop.push(stack.pop.peek % stack.peek); }
+              , function and(stack) { return stack.pop.pop.push(stack.pop.peek & stack.peek); }
+              , function or(stack) { return stack.pop.pop.push(stack.pop.peek | stack.peek); }
+              , function xor(stack) { return stack.pop.pop.push(stack.pop.peek ^ stack.peek); }
+              , function pow(stack) { return stack.pop.pop.push(Math.pow(stack.pop.peek, stack.peek)); }
+              , function min(stack) { return stack.pop.pop.push(Math.min(stack.pop.peek, stack.peek)); }
+              , function max(stack) { return stack.pop.pop.push(Math.max(stack.pop.peek, stack.peek)); } ];
     
     function recurseFind(stack, numbers, path) {
         if(stack.pop.isEmpty && numbers.isEmpty) { return [ path.push(stack.peek) ]; }
