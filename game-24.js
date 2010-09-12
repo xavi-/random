@@ -72,7 +72,7 @@ var makeCombinations = (function() {
 })();
 
 
-var lookup = [], num = "";
+var list = [], num = "";
 for(var i = 0; i < 1e4; i++) {
     if(i < 1) { num = "AAAA"; }
     else if(i < 10) { num = "AAA" + i; }
@@ -81,11 +81,31 @@ for(var i = 0; i < 1e4; i++) {
     else { num = "" + i; }
     
     num = num.replace("0", "A").split("").map(function(n) { return parseInt(n, 11); });
-    lookup.push(makeCombinations(num)
+    list.push(makeCombinations(num)
                     .filter(function(c) { return c.peek === 24; })
                     .map(function(c) { return c.toString(); }));
     
     if(i % 234 === 0) { console.log(i); }
 }
 
-exports.lookup = lookup;
+console.log("creating look up table...");
+var lookup = {}, num = "";
+for(var i = 0; i < 1e4; i++) {
+    if(i < 1) { num = "0000"; }
+    else if(i < 10) { num = "000" + i; }
+    else if(i < 100) { num = "00" + i; }
+    else if(i < 1000) { num = "0" + i; }
+    else { num = "" + i; }
+    
+    num = num.split("").sort().join("");
+    
+    if(!lookup[num]) { lookup[num] = []; }
+    Array.prototype.push.apply(lookup[num], list[i]);
+    
+    if(i % 1234 === 0) { console.log(i); }
+}
+
+var repl = require("repl").start();
+
+repl.context.list = list;
+repl.context.lookup = lookup;
