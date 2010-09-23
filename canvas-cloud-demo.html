@@ -1,0 +1,75 @@
+<html>
+<head>
+    <style>
+    body { padding: 0; margin: 0; }
+    canvas { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <canvas id="cloud" height="300" width="500"></canvas>
+<script>
+    var stopped = false;
+    var repeater = 0, rate = 2;
+    var timeout;
+    var cloud = document.getElementById("cloud").getContext("2d");
+    
+    function doit() {
+        var prev, row;
+        
+        if(stopped) { return; }
+        
+        if(repeater % rate === 0) {
+            row = cloud.createImageData(500, 1);
+            for(var w = 0; w < 500; w++) {
+                row.data[w * 4 + 0] = Math.round(Math.random() * 128);
+                row.data[w * 4 + 1] = Math.round(Math.random() * 256);
+                row.data[w * 4 + 2] = Math.round(Math.random() * 256);
+                row.data[w * 4 + 3] = Math.round(Math.random() * 256);
+            }
+            cloud.putImageData(row, 0, 0);
+        }
+        repeater++;
+        
+        for(var h = 299; h > 0; h--) {
+            prev = cloud.getImageData(0, h - 1, 500, 1).data;
+            row = cloud.getImageData(0, h, 500, 1);
+            
+            row.data[0] = (row.data[0] + 255 + prev[0] * 8 + prev[4]) / 11;
+            row.data[1] = (row.data[1] + 255 + prev[1] * 8 + prev[5]) / 11;
+            row.data[2] = (row.data[2] + 255 + prev[2] * 8 + prev[6]) / 11;
+            row.data[3] = (row.data[3] + 000 + prev[3] * 8 + prev[7]) / 11;
+            for(var w = 1; w < 499; w++) {
+                var center = w * 4, left = (w - 1) * 4, right = (w + 1) * 4;
+                var red   = row.data[w * 4 + 0] + prev[left + 0] + prev[center + 0] * 8 + prev[right + 0];
+                var blue  = row.data[w * 4 + 1] + prev[left + 1] + prev[center + 1] * 8 + prev[right + 1];
+                var green = row.data[w * 4 + 2] + prev[left + 2] + prev[center + 2] * 8 + prev[right + 2];
+                var alpha = row.data[w * 4 + 3] + prev[left + 3] + prev[center + 3] * 8 + prev[right + 3];
+                
+                row.data[w * 4 + 0] = red   / 11;
+                row.data[w * 4 + 1] = blue  / 11;
+                row.data[w * 4 + 2] = green / 11;
+                row.data[w * 4 + 3] = alpha / 11;
+            }
+            row.data[499 * 4 + 0] = (row.data[499 * 4 + 0] + prev[498 * 4 + 0] + prev[499 * 4 + 0] * 8 + 255) / 11;
+            row.data[499 * 4 + 1] = (row.data[499 * 4 + 1] + prev[498 * 4 + 1] + prev[499 * 4 + 1] * 8 + 255) / 11;
+            row.data[499 * 4 + 2] = (row.data[499 * 4 + 2] + prev[498 * 4 + 2] + prev[499 * 4 + 2] * 8 + 255) / 11;
+            row.data[499 * 4 + 3] = (row.data[499 * 4 + 3] + prev[498 * 4 + 3] + prev[499 * 4 + 3] * 8 + 000) / 11;
+            
+            cloud.putImageData(row, 0, h);
+            prev = row;
+        }
+        
+        timeout = setTimeout(doit, 10);
+    }
+    
+    timeout = setTimeout(doit, 50);
+    
+    document.getElementById("cloud").addEventListener("click", function() {
+        stopped = !stopped;
+        
+        if(!stopped) { setTimeout(doit, 50); }
+        else { clearTimeout(timeout); }
+    });
+</script>
+</body>
+</html>
