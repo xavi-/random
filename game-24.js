@@ -1,24 +1,36 @@
 /* Results
 // basic: + - / *
-  148/715
+  150/715
 // basic, pow 
-  126/715
+  128/715
 // basic, mod
-  112/715
+  110/715
 // basic, min/max
-  113/715
+  111/715
 // basic, pow, min/max
   103/715
 // basic, mod, min/max
   105/715
 // with basic, pow, mod
-  97/715
+  95/715
 // basic, pow, mod, min/max
-  92/715
+  90/715
 // boolean: & ^ |
   715/715
-// boolean, pow, mod, min/max
+// boolean, pow:
+  640/715
+// boolean, mod:
+  715/715
+// boolean, min/max:
+  715/715
+// boolean, pow, mod:
+  602/715
+// boolean, pow, min/max
   638/715
+// boolean, mod, min/max
+  715/715
+// boolean, pow, mod, min/max
+  602/715
 // with basic, boolean
   56/715
 // with basic, pow, boolean
@@ -42,8 +54,10 @@
 // with min/max
   715/715
 
+// with pow, mod
+  696/715
 // with pow, mod, min/max
-  715/715
+  696/715
 */
 
 function Stack(head, tail) {
