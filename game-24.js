@@ -126,7 +126,7 @@ function createLookup(ops) {
         else if(i < 1000) { num = "A" + i; }
         else { num = "" + i; }
     
-        num = num.replace("0", "A").split("").map(function(n) { return parseInt(n, 11); });
+        num = num.replace(/0/g, "A").split("").map(function(n) { return parseInt(n, 11); });
         list.push(makeCombinations(num, ops)
                         .filter(function(c) { return c.peek === 24; })
                         .map(function(c) { return c.toString(); }));
