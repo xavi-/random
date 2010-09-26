@@ -67,8 +67,8 @@
     document.getElementById("cloud").addEventListener("click", function() {
         stopped = !stopped;
         
-        if(!stopped) { setTimeout(doit, 50); }
-        else { clearTimeout(timeout); }
+        if(stopped) { clearTimeout(timeout); }
+        else { setTimeout(doit, 50); }
     });
 </script>
 </body>
