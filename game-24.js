@@ -83,17 +83,7 @@ Stack.empty = (function() {
 })();
 
 var makeCombinations = (function() {
-    var ops = [ function multi(stack) { return stack.pop.pop.push(stack.pop.peek * stack.peek); }
-              , function add(stack) { return stack.pop.pop.push(stack.pop.peek + stack.peek); }
-              , function sub(stack) { return stack.pop.pop.push(stack.pop.peek - stack.peek); }
-              , function div(stack) { return stack.pop.pop.push(stack.pop.peek / stack.peek); }
-              , function mod(stack) { return stack.pop.pop.push(stack.pop.peek % stack.peek); }
-              , function and(stack) { return stack.pop.pop.push(stack.pop.peek & stack.peek); }
-              , function or(stack) { return stack.pop.pop.push(stack.pop.peek | stack.peek); }
-              , function xor(stack) { return stack.pop.pop.push(stack.pop.peek ^ stack.peek); }
-              , function pow(stack) { return stack.pop.pop.push(Math.pow(stack.pop.peek, stack.peek)); }
-              , function min(stack) { return stack.pop.pop.push(Math.min(stack.pop.peek, stack.peek)); }
-              , function max(stack) { return stack.pop.pop.push(Math.max(stack.pop.peek, stack.peek)); } ];
+    var ops;
     
     function recurseFind(stack, numbers, path) {
         if(stack.pop.isEmpty && numbers.isEmpty) { return [ path.push(stack.peek) ]; }
@@ -121,46 +111,86 @@ var makeCombinations = (function() {
         return paths;
     }
     
-    return function findCombinations(numbers) {
+    return function findCombinations(numbers, operations) {
+        ops = operations || repl.context.all;
         return recurseFind(new Stack(), new Stack(numbers), new Stack());
     }
 })();
 
+function createLookup(ops) {
+    var list = [], num = "";
+    for(var i = 0; i < 1e4; i++) {
+        if(i < 1) { num = "AAAA"; }
+        else if(i < 10) { num = "AAA" + i; }
+        else if(i < 100) { num = "AA" + i; }
+        else if(i < 1000) { num = "A" + i; }
+        else { num = "" + i; }
+    
+        num = num.replace("0", "A").split("").map(function(n) { return parseInt(n, 11); });
+        list.push(makeCombinations(num, ops)
+                        .filter(function(c) { return c.peek === 24; })
+                        .map(function(c) { return c.toString(); }));
+    
+        if(i % 234 === 0) { console.log(i); }
+    }
 
-var list = [], num = "";
-for(var i = 0; i < 1e4; i++) {
-    if(i < 1) { num = "AAAA"; }
-    else if(i < 10) { num = "AAA" + i; }
-    else if(i < 100) { num = "AA" + i; }
-    else if(i < 1000) { num = "A" + i; }
-    else { num = "" + i; }
+    console.log("creating look up table...");
+    var lookup = {}, num = "";
+    for(var i = 0; i < 1e4; i++) {
+        if(i < 1) { num = "0000"; }
+        else if(i < 10) { num = "000" + i; }
+        else if(i < 100) { num = "00" + i; }
+        else if(i < 1000) { num = "0" + i; }
+        else { num = "" + i; }
     
-    num = num.replace("0", "A").split("").map(function(n) { return parseInt(n, 11); });
-    list.push(makeCombinations(num)
-                    .filter(function(c) { return c.peek === 24; })
-                    .map(function(c) { return c.toString(); }));
+        num = num.split("").sort().join("");
     
-    if(i % 234 === 0) { console.log(i); }
+        if(!lookup[num]) { lookup[num] = []; }
+        Array.prototype.push.apply(lookup[num], list[i]);
+    
+        if(i % 1234 === 0) { console.log(i); }
+    }
+    
+    return { list: list, lookup: lookup };
 }
 
-console.log("creating look up table...");
-var lookup = {}, num = "";
-for(var i = 0; i < 1e4; i++) {
-    if(i < 1) { num = "0000"; }
-    else if(i < 10) { num = "000" + i; }
-    else if(i < 100) { num = "00" + i; }
-    else if(i < 1000) { num = "0" + i; }
-    else { num = "" + i; }
-    
-    num = num.split("").sort().join("");
-    
-    if(!lookup[num]) { lookup[num] = []; }
-    Array.prototype.push.apply(lookup[num], list[i]);
-    
-    if(i % 1234 === 0) { console.log(i); }
-}
 
-var repl = require("repl").start();
+function multi(stack) { return stack.pop.pop.push(stack.pop.peek * stack.peek); }
+function add(stack) { return stack.pop.pop.push(stack.pop.peek + stack.peek); }
+function sub(stack) { return stack.pop.pop.push(stack.pop.peek - stack.peek); }
+function div(stack) { return stack.pop.pop.push(stack.pop.peek / stack.peek); }
+function and(stack) { return stack.pop.pop.push(stack.pop.peek & stack.peek); }
+function or(stack) { return stack.pop.pop.push(stack.pop.peek | stack.peek); }
+function xor(stack) { return stack.pop.pop.push(stack.pop.peek ^ stack.peek); }
+function mod(stack) { return stack.pop.pop.push(stack.pop.peek % stack.peek); }
+function pow(stack) { return stack.pop.pop.push(Math.pow(stack.pop.peek, stack.peek)); }
+function min(stack) { return stack.pop.pop.push(Math.min(stack.pop.peek, stack.peek)); }
+function max(stack) { return stack.pop.pop.push(Math.max(stack.pop.peek, stack.peek)); }
 
-repl.context.list = list;
-repl.context.lookup = lookup;
+var basic = [ add, sub, multi, div ];
+var bool = [ and, or, xor ];
+var minMax = [ min, max ];
+var all = basic.concat(mod, pow, bool, minMax);
+
+var results = createLookup(basic);
+
+var repl = require("repl").start("> ");
+
+all.forEach(function(op) { repl.context[op.name] = op; });
+
+repl.context.basic = basic;
+repl.context.bool = bool;
+repl.context.minMax = minMax;
+repl.context.all = all;
+
+repl.context.results = results;
+repl.context.recalculate = function() {
+    var ops = [];
+    
+    ops = Array.prototype.concat.apply(ops, arguments);
+    
+    result = createLookup(ops);
+    
+    repl.context.results.list = result.list;
+    repl.context.results.lookup = result.lookup;
+};
