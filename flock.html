@@ -1,0 +1,140 @@
+<html>
+<head>
+<style>
+    #flight { position: relative; float: left; width: 800px; height: 600px; border: thin solid black; }
+    .particle { position: absolute; width: 5px; height: 5px; background: red; }
+</style>
+</head>
+<body>
+    <div id="flight"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script>
+    var WIDTH = $("#flight").width(), HEIGHT = $("#flight").height();
+    var particles = [], stopped = true, timeout, leader = { x: 500, y: 500 };
+    
+    for(var i = 0; i < 30; i++) {
+        particles.push({ x: Math.round(Math.random() * WIDTH), y: Math.round(Math.random() * HEIGHT)
+                       , dx: Math.round(Math.random() * 7) - 3, dy: Math.round(Math.random() * 7) - 3 });
+    }
+    
+    particles.forEach(function(particle, i) {
+        $("<div id='particle-" + i + "' class='particle' />")
+            .css({ left: particle.x, top: particle.y })
+            .appendTo("#flight");
+    });
+    
+    function dist(a, b) {
+        var x = Math.abs(a.x - b.x);
+        var y = Math.abs(a.y - b.y);
+        return Math.pow(Math.min(x, WIDTH - x), 2) + Math.pow(Math.min(y, HEIGHT - y), 2)
+    }
+    
+    function getVec(a, b) {
+        var x = b.x - a.x;
+        var y = b.y - a.y;
+        
+        if(Math.abs(x) > Math.abs(x - WIDTH)) { x = x - WIDTH; }
+        if(Math.abs(y) > Math.abs(y - HEIGHT)) { y = y - HEIGHT; }
+        
+        return { dx: x, dy: y };
+    }
+    
+    var TOP_SPEED = 6;
+    function collarSpeed(speed) {
+        var absX = Math.abs(speed.dx), absY = Math.abs(speed.dy);
+        
+        if(absX < TOP_SPEED && absY < TOP_SPEED) { return; }
+        
+        if(absX > absY) {
+            speed.dx = Math.max(Math.min(speed.dx, TOP_SPEED), -TOP_SPEED);
+            speed.dy *= TOP_SPEED / absX;
+        } else {
+            speed.dx *= TOP_SPEED / absY;
+            speed.dy = Math.max(Math.min(speed.dy, TOP_SPEED), -TOP_SPEED);
+        }
+    }
+    
+    function adjustDirection(particles) {
+        particles.forEach(function(center) {
+            var noiseVec = { dx: Math.random() * 2 - 1, dy: Math.random() * 2 - 1 };
+            
+            var leaderVec = getVec(center, leader);
+            leaderVec.dx = leaderVec.dx / WIDTH * TOP_SPEED;
+            leaderVec.dy = leaderVec.dy / HEIGHT * TOP_SPEED;
+            
+            var centroidVec = { dx: 0, dy: 0 };
+            particles.forEach(function(particle) {
+                if(particle === center) { return; }
+                
+                var vec = getVec(center, particle);
+                centroidVec.dx += vec.dx;
+                centroidVec.dy += vec.dy;
+            });
+            centroidVec.dx = (centroidVec.dx / particles.length) / WIDTH * 2;
+            centroidVec.dy = (centroidVec.dy / particles.length) / HEIGHT * 2;
+            
+            var influencers = particles.filter(function(p) { return p !== center && dist(center, p) < 3600; });
+            
+            if(influencers.length === 0) {
+                center.dx = 2 * center.dx + centroidVec.dx + leaderVec.dx + noiseVec.dx;
+                center.dy = 2 * center.dy + centroidVec.dy + leaderVec.dy + noiseVec.dy;
+                collarSpeed(center);
+                
+                return;
+            }
+            
+            var idealVec = { dx: 0, dy: 0 };
+            var justRightVec = { dx: 0, dy: 0 }, tooCloseVec = { dx: 0, dy: 0 }
+            influencers.forEach(function(particle) {
+                var distCenter = dist(center, particle);
+                var vec = getVec(center, particle);
+            
+                if(distCenter < 100) { // Too Close
+                    tooCloseVec.dx += vec.dx * (distCenter - 100) / 10;
+                    tooCloseVec.dy += vec.dy * (distCenter - 100) / 10;
+                } else { // Just right
+                    justRightVec.dx += vec.dx * distCenter / 3600;
+                    justRightVec.dy += vec.dy * distCenter / 3600;
+                }
+            });
+            
+            // Make tooCloseVec vector perpendicular to itself
+            var tmp = tooCloseVec.dx;
+            tooCloseVec.dx = -tooCloseVec.dy;
+            tooCloseVec.dy = tmp;
+            
+            idealVec = { dx: (.2 * justRightVec.dx + .8 * tooCloseVec.dx) / influencers.length
+                       , dy: (.2 * justRightVec.dy + .8 * tooCloseVec.dy) / influencers.length };
+            
+            center.dx = 2 * center.dx + idealVec.dx + centroidVec.dx + leaderVec.dx + noiseVec.dx;
+            center.dy = 2 * center.dy + idealVec.dy + centroidVec.dy + leaderVec.dy + noiseVec.dy;
+            collarSpeed(center);
+        });
+    }
+    
+    function updatePos() {
+        adjustDirection(particles);
+        
+        particles.forEach(function(particle, i) {
+            particle.x = (particle.x + particle.dx + WIDTH) % WIDTH;
+            particle.y = (particle.y + particle.dy + HEIGHT) % HEIGHT;
+            
+            $("#particle-" + i).css({ left: particle.x, top: particle.y });
+        });
+        
+        if(!stopped) { timeout = setTimeout(updatePos, 10); }
+    }
+    
+    $("#flight").click(function() {
+        stopped = !stopped;
+        
+        if(stopped) { clearInterval(timeout); }
+        else { timeout = setTimeout(updatePos, 10); }
+    })
+    .mousemove(function(e) {
+        leader.x = e.pageX - this.offsetLeft;
+        leader.y = e.pageY - this.offsetTop;
+    });
+</script>
+</body>
+</html>
