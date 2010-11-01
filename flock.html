@@ -53,31 +53,21 @@
             leaderVec.dy = leaderVec.dy / HEIGHT * TOP_SPEED;
             
             var centroidVec = { dx: 0, dy: 0 };
+            var idealVec = { dx: 0, dy: 0 };
+            
+            var justRightVec = { dx: 0, dy: 0 }, tooCloseVec = { dx: 0, dy: 0 }
+            var influencers = 0;
             particles.forEach(function(particle) {
                 if(particle === center) { return; }
                 
-                var vec = getVec(center, particle);
-                centroidVec.dx += vec.dx;
-                centroidVec.dy += vec.dy;
-            });
-            centroidVec.dx = (centroidVec.dx / particles.length) / WIDTH * 2;
-            centroidVec.dy = (centroidVec.dy / particles.length) / HEIGHT * 2;
-            
-            var influencers = particles.filter(function(p) { return p !== center && dist(center, p) < 3600; });
-            
-            if(influencers.length === 0) {
-                center.dx = 2 * center.dx + centroidVec.dx + leaderVec.dx + noiseVec.dx;
-                center.dy = 2 * center.dy + centroidVec.dy + leaderVec.dy + noiseVec.dy;
-                collarSpeed(center);
-                
-                return;
-            }
-            
-            var idealVec = { dx: 0, dy: 0 };
-            var justRightVec = { dx: 0, dy: 0 }, tooCloseVec = { dx: 0, dy: 0 }
-            influencers.forEach(function(particle) {
                 var distCenter = dist(center, particle);
                 var vec = getVec(center, particle);
+                
+                centroidVec.dx += vec.dx;
+                centroidVec.dy += vec.dy;
+                
+                if(distCenter > 3600) { return; }
+                else { influencers += 1; }
                 
                 if(distCenter < 100) { // Too Close
                     tooCloseVec.dx += vec.dx * (distCenter - 100) / 10;
@@ -88,13 +78,24 @@
                 }
             });
             
+            centroidVec.dx = (centroidVec.dx / particles.length) / WIDTH * 2;
+            centroidVec.dy = (centroidVec.dy / particles.length) / HEIGHT * 2;
+            
+            if(influencers === 0) {
+                center.dx = 2 * center.dx + centroidVec.dx + leaderVec.dx + noiseVec.dx;
+                center.dy = 2 * center.dy + centroidVec.dy + leaderVec.dy + noiseVec.dy;
+                collarSpeed(center);
+                
+                return;
+            }
+              
             // Make tooCloseVec vector perpendicular to itself
             var tmp = tooCloseVec.dx;
             tooCloseVec.dx = -tooCloseVec.dy;
             tooCloseVec.dy = tmp;
             
-            idealVec = { dx: (.2 * justRightVec.dx + .8 * tooCloseVec.dx) / influencers.length
-                       , dy: (.2 * justRightVec.dy + .8 * tooCloseVec.dy) / influencers.length };
+            idealVec = { dx: (.2 * justRightVec.dx + .8 * tooCloseVec.dx) / influencers
+                       , dy: (.2 * justRightVec.dy + .8 * tooCloseVec.dy) / influencers };
             
             center.dx = 2 * center.dx + idealVec.dx + centroidVec.dx + leaderVec.dx + noiseVec.dx;
             center.dy = 2 * center.dy + idealVec.dy + centroidVec.dy + leaderVec.dy + noiseVec.dy;
