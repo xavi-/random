@@ -6,6 +6,7 @@
 </style>
 </head>
 <body>
+    <div id="fps">0</div>
     <div id="flight"></div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script>
@@ -88,7 +89,7 @@
             influencers.forEach(function(particle) {
                 var distCenter = dist(center, particle);
                 var vec = getVec(center, particle);
-            
+                
                 if(distCenter < 100) { // Too Close
                     tooCloseVec.dx += vec.dx * (distCenter - 100) / 10;
                     tooCloseVec.dy += vec.dy * (distCenter - 100) / 10;
@@ -112,29 +113,40 @@
         });
     }
     
+    var lastFrame = Date.now();
     function updatePos() {
         adjustDirection(particles);
         
         particles.forEach(function(particle, i) {
             particle.x = (particle.x + particle.dx + WIDTH) % WIDTH;
             particle.y = (particle.y + particle.dy + HEIGHT) % HEIGHT;
-            
-            $("#particle-" + i).css({ left: particle.x, top: particle.y });
         });
         
+        drawParticles(particles);
+        
         if(!stopped) { timeout = setTimeout(updatePos, 10); }
+        
+        $("#fps").text(Math.round(1000 / (Date.now() - lastFrame)));
+        lastFrame = Date.now();
     }
     
-    $("#flight").click(function() {
-        stopped = !stopped;
-        
-        if(stopped) { clearInterval(timeout); }
-        else { timeout = setTimeout(updatePos, 10); }
-    })
-    .mousemove(function(e) {
-        leader.x = e.pageX - this.offsetLeft;
-        leader.y = e.pageY - this.offsetTop;
-    });
+    function drawParticles(particles) {
+        particles.forEach(function(particle, i) {
+            $("#particle-" + i).css({ left: particle.x, top: particle.y });
+        });
+    }
+    
+    $("#flight")
+        .click(function() {
+            stopped = !stopped;
+            
+            if(stopped) { clearInterval(timeout); }
+            else { timeout = setTimeout(updatePos, 10); }
+        })
+        .mousemove(function(e) {
+            leader.x = e.pageX - this.offsetLeft;
+            leader.y = e.pageY - this.offsetTop;
+        });
 </script>
 </body>
 </html>
