@@ -13,17 +13,6 @@
     var WIDTH = $("#flight").width(), HEIGHT = $("#flight").height();
     var particles = [], stopped = true, timeout, leader = { x: 500, y: 500 };
     
-    for(var i = 0; i < 30; i++) {
-        particles.push({ x: Math.round(Math.random() * WIDTH), y: Math.round(Math.random() * HEIGHT)
-                       , dx: Math.round(Math.random() * 7) - 3, dy: Math.round(Math.random() * 7) - 3 });
-    }
-    
-    particles.forEach(function(particle, i) {
-        $("<div id='particle-" + i + "' class='particle' />")
-            .css({ left: particle.x, top: particle.y })
-            .appendTo("#flight");
-    });
-    
     function dist(a, b) {
         var x = Math.abs(a.x - b.x);
         var y = Math.abs(a.y - b.y);
@@ -135,6 +124,17 @@
             $("#particle-" + i).css({ left: particle.x, top: particle.y });
         });
     }
+    
+    for(var i = 0; i < 30; i++) {
+        particles.push({ x: Math.round(Math.random() * WIDTH), y: Math.round(Math.random() * HEIGHT)
+                       , dx: Math.round(Math.random() * 7) - 3, dy: Math.round(Math.random() * 7) - 3 });
+    }
+    
+    particles.forEach(function(particle, i) {
+        $("<div id='particle-" + i + "' class='particle' />")
+            .css({ left: particle.x, top: particle.y })
+            .appendTo("#flight");
+    });
     
     $("#flight")
         .click(function() {
