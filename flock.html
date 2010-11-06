@@ -172,9 +172,17 @@
             if(stopped) { clearInterval(timeout); }
             else { timeout = setTimeout(updatePos, 10); }
         })
-        .mousemove(function(e) {
+        .bind("mousemove touchmove MozTouchMove",function(e) {
+            if(e.originalEvent.touches && e.originalEvent.touches.length) {
+                e = e.originalEvent.touches[0];
+            } else if(e.originalEvent.changedTouches && e.originalEvent.changedTouches.length) {
+                e = e.originalEvent.changedTouches[0];
+            }
+            
             leader.x = e.pageX - this.offsetLeft;
             leader.y = e.pageY - this.offsetTop;
+            
+            return false;
         });
     $("input:radio[name=display]").click(function() {
         drawWithDom = ($(this).val() === "dom");
