@@ -70,8 +70,8 @@
                 else { influencers += 1; }
                 
                 if(distCenter < 100) { // Too Close
-                    tooCloseVec.dx += vec.dx * (distCenter - 100) / 10;
-                    tooCloseVec.dy += vec.dy * (distCenter - 100) / 10;
+                    tooCloseVec.dx += vec.dx * (distCenter - 100) / 50;
+                    tooCloseVec.dy += vec.dy * (distCenter - 100) / 50;
                 } else { // Just right
                     justRightVec.dx += vec.dx * distCenter / 3600;
                     justRightVec.dy += vec.dy * distCenter / 3600;
@@ -88,7 +88,7 @@
                 
                 return;
             }
-              
+            
             // Make tooCloseVec vector perpendicular to itself
             var tmp = tooCloseVec.dx;
             tooCloseVec.dx = -tooCloseVec.dy;
@@ -120,22 +120,25 @@
         lastFrame = Date.now();
     }
     
-    function drawParticles(particles) {
+    var drawParticles = function(particles) {
         particles.forEach(function(particle, i) {
-            $("#particle-" + i).css({ left: particle.x, top: particle.y });
+            $("<div id='particle-" + i + "' class='particle' />")
+                .css({ left: particle.x, top: particle.y })
+                .appendTo("#flight");
         });
-    }
+        
+        drawParticles = function(particles) { // Replace drawParticles with function that just moves divs
+            particles.forEach(function(particle, i) {
+                $("#particle-" + i).css({ left: particle.x, top: particle.y });
+            });
+        }
+    };
     
     for(var i = 0; i < 30; i++) {
         particles.push({ x: Math.round(Math.random() * WIDTH), y: Math.round(Math.random() * HEIGHT)
                        , dx: Math.round(Math.random() * 7) - 3, dy: Math.round(Math.random() * 7) - 3 });
     }
-    
-    particles.forEach(function(particle, i) {
-        $("<div id='particle-" + i + "' class='particle' />")
-            .css({ left: particle.x, top: particle.y })
-            .appendTo("#flight");
-    });
+    drawParticles(particles);
     
     $("#flight")
         .click(function() {
