@@ -10,15 +10,17 @@
 <body>
     <div>
         FPS: <span id="fps">0</span>
-        <label><input type="radio" name="display" checked />Use DOM</label>
-        <label><input type="radio" name="display" />Use Canvas</label>
+        <span class="display-options">
+            <label><input type="radio" name="display" value="dom" checked />Use DOM</label>
+            <label><input type="radio" name="display" value="canvas" />Use Canvas</label>
+        <span>
     </div>
     <div id="flight-div" class="flight-display"></div>
     <canvas id="flight-canvas" class="flight-display" width="800" height="600"></canvas>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 <script>
     var WIDTH = $(".flight-display").width(), HEIGHT = $(".flight-display").height();
-    var particles = [], stopped = true, timeout, leader = { x: 500, y: 500 };
+    var stopped = true, timeout, leader = { x: 500, y: 500 }, drawWithDom = true;
     
     function dist(a, b) {
         var x = Math.abs(a.x - b.x);
@@ -126,36 +128,42 @@
         $("#fps").text(Math.round(1000 / (Date.now() - lastFrame)));
         lastFrame = Date.now();
     }
-    /*
-    var drawParticles = function(particles) {
-        particles.forEach(function(particle, i) {
-            $("<div id='particle-" + i + "' class='particle' />")
-                .css({ left: particle.x, top: particle.y })
-                .appendTo("#flight-div");
-        });
-        
-        drawParticles = function(particles) { // Replace drawParticles with function that just moves divs
+    
+    var drawParticles = (function() {
+        var drawParticlesDom = function(particles) {
             particles.forEach(function(particle, i) {
-                $("#particle-" + i).css({ left: particle.x, top: particle.y });
+                $("<div id='particle-" + i + "' class='particle' />")
+                    .css({ left: particle.x, top: particle.y })
+                    .appendTo("#flight-div");
+            });
+        
+            drawParticlesDom = function(particles) { // Replace drawParticles with function that just moves divs
+                particles.forEach(function(particle, i) {
+                    $("#particle-" + i).css({ left: particle.x, top: particle.y });
+                });
+            }
+        };
+    
+        var ctx = $("#flight-canvas")[0].getContext("2d");
+        ctx.fillStyle = "red";
+        function drawParticlesCanvas(particles) {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            particles.forEach(function(particle) {
+                ctx.fillRect(particle.x, particle.y, 5, 5);
             });
         }
-    };
-    */
     
-    var ctx = $("#flight-canvas")[0].getContext("2d");
-    ctx.fillStyle = "red";
-    function drawParticles(particles) {
-        ctx.clearRect(0, 0, WIDTH, HEIGHT);
-        particles.forEach(function(particle) {
-            ctx.fillRect(particle.x, particle.y, 5, 5);
-        });
-    }
-    $("#flight-div").hide();
+        return function(particles) {
+            if(drawWithDom) { drawParticlesDom(particles); }
+            else { drawParticlesCanvas(particles); }
+        }
+    })();
+    
+    var particles = [];
     for(var i = 0; i < 30; i++) {
         particles.push({ x: Math.round(Math.random() * WIDTH), y: Math.round(Math.random() * HEIGHT)
                        , dx: Math.round(Math.random() * 7) - 3, dy: Math.round(Math.random() * 7) - 3 });
     }
-    drawParticles(particles);
     
     $(".flight-display")
         .click(function() {
@@ -168,6 +176,14 @@
             leader.x = e.pageX - this.offsetLeft;
             leader.y = e.pageY - this.offsetTop;
         });
+    $("input:radio[name=display]").click(function() {
+        drawWithDom = ($(this).val() === "dom");
+        
+        $("#flight-div").toggle(drawWithDom);
+        $("#flight-canvas").toggle(!drawWithDom);
+        
+        drawParticles(particles);
+    }).filter(":checked").click();
 </script>
 </body>
 </html>
