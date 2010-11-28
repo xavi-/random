@@ -112,7 +112,7 @@
         });
     }
     
-    var lastFrame = Date.now();
+    var lastFrameTime = Date.now(), frameCount = 0, AVG_FRAME_WINDOW = 20;
     function updatePos() {
         adjustDirection(particles);
         
@@ -125,8 +125,10 @@
         
         if(!stopped) { timeout = setTimeout(updatePos, 10); }
         
-        $("#fps").text(Math.round(1000 / (Date.now() - lastFrame)));
-        lastFrame = Date.now();
+        if(frameCount++ % AVG_FRAME_WINDOW === 0) {
+            $("#fps").text(Math.round(AVG_FRAME_WINDOW * 1000 / (Date.now() - lastFrameTime)));
+            lastFrameTime = Date.now();
+        }
     }
     
     var drawParticles = (function() {
