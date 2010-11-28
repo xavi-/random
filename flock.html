@@ -3,7 +3,7 @@
 <head>
 <style>
     .flight-display { float: left; border: thin solid black; width: 800px; height: 600px; }
-    #flight-div { position: relative; }
+    #display-div { position: relative; }
     .particle { position: absolute; width: 5px; height: 5px; background: red; }
 </style>
 </head>
@@ -13,10 +13,12 @@
         <span class="display-options">
             <label><input type="radio" name="display" value="dom" checked />Use DOM</label>
             <label><input type="radio" name="display" value="canvas" />Use Canvas</label>
+            <label><input type="radio" name="display" value="none" />No Display (Theoretical Max FPS)</label>
         <span>
     </div>
-    <div id="flight-div" class="flight-display"></div>
-    <canvas id="flight-canvas" class="flight-display" width="800" height="600"></canvas>
+    <div id="display-div" class="flight-display"></div>
+    <canvas id="display-canvas" class="flight-display" width="800" height="600"></canvas>
+    <div id="display-none" class="flight-display"></div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 <script>
     var WIDTH = $(".flight-display").width(), HEIGHT = $(".flight-display").height();
@@ -136,7 +138,7 @@
             particles.forEach(function(particle, i) {
                 $("<div id='particle-" + i + "' class='particle' />")
                     .css({ left: particle.x, top: particle.y })
-                    .appendTo("#flight-div");
+                    .appendTo("#display-div");
             });
         
             drawParticlesDom = function(particles) { // Replace drawParticles with function that just moves divs
@@ -146,7 +148,7 @@
             }
         };
     
-        var ctx = $("#flight-canvas")[0].getContext("2d");
+        var ctx = $("#display-canvas")[0].getContext("2d");
         ctx.fillStyle = "red";
         function drawParticlesCanvas(particles) {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -154,10 +156,16 @@
                 ctx.fillRect(particle.x, particle.y, 5, 5);
             });
         }
-    
+        
+        function drawParticlesNone(particles) {
+        }
+        
         return function(particles) {
-            if(drawWithDom) { drawParticlesDom(particles); }
-            else { drawParticlesCanvas(particles); }
+            switch(drawWith) {
+                case "dom": drawParticlesDom(particles); break;
+                case "canvas": drawParticlesCanvas(particles); break;
+                default: drawParticlesNone(particles); break;
+            }
         }
     })();
     
@@ -187,10 +195,11 @@
             return false;
         });
     $("input:radio[name=display]").click(function() {
-        drawWithDom = ($(this).val() === "dom");
+        drawWith = $(this).val();
         
-        $("#flight-div").toggle(drawWithDom);
-        $("#flight-canvas").toggle(!drawWithDom);
+        $("#display-div").toggle(drawWith === "dom");
+        $("#display-canvas").toggle(drawWith === "canvas");
+        $("#display-none").toggle(drawWith === "none");
         
         drawParticles(particles);
     }).filter(":checked").click();
