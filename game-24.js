@@ -188,6 +188,9 @@ var all = basic.concat(mod, pow, bool, minMax);
 
 var results = createLookup(basic);
 
+console.log("------------------------\n");
+console.log("Use `results.lookup` to check solutions. Note numbers should be in ascending order.");
+
 var repl = require("repl").start("> ");
 
 all.forEach(function(op) { repl.context[op.name] = op; });
