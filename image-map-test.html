@@ -40,7 +40,7 @@
     </div>
 <script>
 function moveArea() {
-    document.getElementById("area").coords = "400,400,400,500,500,500,500,400";
+    document.getElementById("area").setAttribute("coords", "400,400,400,500,500,500,500,400");
     document.getElementById("indicator").style.top = "400px";
     document.getElementById("indicator").style.left = "400px";
     alert("Area should now be at 400px, 400px");
