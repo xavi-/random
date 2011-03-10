@@ -4,16 +4,17 @@
 <style>
     #board-screen {
         position: absolute;
-        top: 0px;
-        left: 0px;
-        border: thin black solid; 
+        z-index: 1;
         width: 500px;
         height: 500px;
-        z-index: 10;
+        border: none;
     }
     
-    div {
+    #border-container {
         position: relative;
+        width: 500px;
+        height: 500px;
+        border: thin black solid;
     }
     
     #indicator {
@@ -28,23 +29,36 @@
 </style>
 </head>
 <body>
-    This page tests whether or not the browser updates an image map after an <code>area</code> element has been changed by javascript.
-    <br/>
-    The green square should always be aligned with an area element.
-    <div>
+    <p>
+        This page tests whether or not the browser updates an image map after an <code>area</code> element has been changed by javascript.
+        <br/>
+        The green square should always be aligned with an area element.
+    </p>
+    <div id="border-container">
         <img id="board-screen" alt="board" src="pics/transparent.gif" usemap="#board-def" />
         <map id="board-def" name="board-def">
-            <area id="area" shape="poly" coords="0,0,0,100,100,100,100,0" onclick="moveArea();"/>
+            <area id="area" shape="poly" coords="0,0,0,100,100,100,100,0"/>
         </map>
         <div id="indicator">Click to move</div>
     </div>
+    <p>
+        Naively updating the coords attributes doesn't work in webkit browsers, but there is a work around:
+        <ol>
+            <li>Remove <code>area</code> node from the document</li>
+            <li>Clone <code>area</code> node</li>
+            <li>Update <code>coords</code> attribute</li>
+            <li>Reattach event listeners</li>
+            <li>Append clone to <code>map</code> element</li>
+        </ol>
+    </p>
 <script>
-function moveArea() {
-    document.getElementById("area").setAttribute("coords", "400,400,400,500,500,500,500,400");
-    document.getElementById("indicator").style.top = "400px";
-    document.getElementById("indicator").style.left = "400px";
-    alert("Area should now be at 400px, 400px");
-}
+    function moveArea() {
+        document.getElementById("area").setAttribute("coords", "400,400,400,500,500,500,500,400");
+        document.getElementById("indicator").style.top = "400px";
+        document.getElementById("indicator").style.left = "400px";
+        alert("Area should now be at 400px, 400px");
+    }
+    document.getElementById("area").addEventListener("click", moveArea, false);
 </script>
 </body>
 </html>
