@@ -5,52 +5,97 @@
 {
     filter:progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand');
 }
+
+body
+{
+	background: blue;
+}
 </style>
-<script src="jquery-1.2.6.js"></script>
+<script src="jquery-1.3.1.js"></script>
 </head>
 <body>
-    <input type="button" value="rotate by 90 deg" onclick="rotate()"/> 
-    <br/>
-    <img id="aDiv" src="pics/halo-dude.jpg"/>
+    <img id="aDiv" src="halo-dude.jpg"/>
+    <div id="angle"></div>
 <script>
-    var deg = 0;
-    var i = new Image();
-    i.src = "pics/halo-dude.jpg";
-    
-    $("img")
-        .replaceWith("<canvas></canvas>")
+var xv = {};
+
+(function() {
+	xv.rotatable = function(img) {
+		 var _useCanvas = !this.filters;
+
+		 var rot = {};
+
+		 rot.element = (function() {
+			  if(!_useCanvas) return img;
+
+			  var diag = Math.sqrt(img.width * img.width + img.height * img.height);
+			  var cnv = $("<canvas>").attr("img-src", $(img).attr("src"));
+			  cnv.attr("width", diag);
+			  cnv.attr("height", diag);
+
+			  var c = cnv[0].getContext("2d");
+			  c.translate(diag / 2,  diag / 2);
+
+			  $(img).replaceWith(cnv);
+
+			  return cnv[0];
+		 })();
+
+		 rot.rotate = (function() {
+			  if (_useCanvas) {
+				   var diag = Math.sqrt(img.width * img.width + img.height * img.height);
+				   var c = rot.element.getContext("2d");
+
+				   return function(rad) {
+						c.clearRect(-diag / 2, -diag / 2, diag, diag);
+						
+						c.save();
+						c.rotate(rad);
+						c.drawImage(img, -img.width / 2, -img.height / 2);
+						c.restore();
+				   };
+			  }
+
+			  var filterItem = rot.element.filters.item(0);
+			  return function(rad) {
+				   var costheta = Math.cos(rad);
+				   var sintheta = Math.sin(rad);
+
+				   filterItem.M11 = costheta;
+				   filterItem.M12 = -sintheta;
+				   filterItem.M21 = sintheta;
+				   filterItem.M22 = costheta;
+			  };
+		 })();
+		 
+		 rot.rotate(0);
+		 return rot;
+	};
+	
+	var rotatables = [];
+	$("img")
         .each(function() {
-            var c = this.getContext("2d");
-            document.getElementById("tutorial").setAttribute('width', i.height);
-            document.getElementById("tutorial").setAttribute('height', i.width);
-            c.rotate(1.4);
-            c.drawImage(i,0,0);
+			  var rot = xv.rotatable(this);
+			  rotatables.push(rot);
+
+			  var regulator = 0;
+			  var $this = $(rot.element);
+			  var halfWidth = $this.width() / 2;
+			  var halfHeight = $this.height() / 2;
+			  $(rot.element).mousemove(function(e) {
+				   if(regulator++ % 3 != 0) return; 
+
+				   var offset = $this.offset();
+				   var center = { x: offset.left + halfWidth, y: offset.top + halfHeight };
+				   var vec = { x: e.pageX - center.x, y: e.pageY - center.y };
+				   
+				   var angle = Math.PI - Math.atan2(vec.x, vec.y);
+
+				   $("#angle").text(angle * 180 / Math.PI );
+				   rot.rotate(angle);
+			  });
         });
-    
-    function rotate() {
-        var d = document.getElementById("aDiv");
-        var deg2radians = Math.PI * 2 / 360;
-        
-        deg += 10;
-        rad = deg * deg2radians ;
-        
-        if(d.filters) {
-            costheta = Math.cos(rad);
-            sintheta = Math.sin(rad);
-            
-            d.filters.item(0).M11 = costheta;
-            d.filters.item(0).M12 = -sintheta;
-            d.filters.item(0).M21 = sintheta;
-            d.filters.item(0).M22 = costheta;    
-        }
-        else {
-            var c = document.getElementById("tutorial").getContext("2d");        
-            document.getElementById("tutorial").setAttribute('width', i.height);
-            document.getElementById("tutorial").setAttribute('height', i.width);
-            c.rotate(rad);
-            c.drawImage(i,0,0);
-        }
-    }
+})();
 </script>
 </body>
 </html>
