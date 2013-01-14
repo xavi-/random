@@ -1,0 +1,56 @@
+<html>
+<head>
+<style>
+#aDiv
+{
+    filter:progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand');
+}
+</style>
+<script src="jquery-1.2.6.js"></script>
+</head>
+<body>
+    <input type="button" value="rotate by 90 deg" onclick="rotate()"/> 
+    <br/>
+    <img id="aDiv" src="pics/halo-dude.jpg"/>
+<script>
+    var deg = 0;
+    var i = new Image();
+    i.src = "pics/halo-dude.jpg";
+    
+    $("img")
+        .replaceWith("<canvas></canvas>")
+        .each(function() {
+            var c = this.getContext("2d");
+            document.getElementById("tutorial").setAttribute('width', i.height);
+            document.getElementById("tutorial").setAttribute('height', i.width);
+            c.rotate(1.4);
+            c.drawImage(i,0,0);
+        });
+    
+    function rotate() {
+        var d = document.getElementById("aDiv");
+        var deg2radians = Math.PI * 2 / 360;
+        
+        deg += 10;
+        rad = deg * deg2radians ;
+        
+        if(d.filters) {
+            costheta = Math.cos(rad);
+            sintheta = Math.sin(rad);
+            
+            d.filters.item(0).M11 = costheta;
+            d.filters.item(0).M12 = -sintheta;
+            d.filters.item(0).M21 = sintheta;
+            d.filters.item(0).M22 = costheta;    
+        }
+        else {
+            var c = document.getElementById("tutorial").getContext("2d");        
+            document.getElementById("tutorial").setAttribute('width', i.height);
+            document.getElementById("tutorial").setAttribute('height', i.width);
+            c.rotate(rad);
+            c.drawImage(i,0,0);
+        }
+    }
+</script>
+</body>
+</html>
