@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.day { font-family: sans-serif; display: flex; }
+	.schedule-container {
+		display: inline-block;
+		background: #ececec;
+		height: 720px;
+		width: 600px;
+		padding: 0 10px;
+		border: 1px solid #d5d5d5;
+		margin: 1em 0;
+	}
+	.schedule { position: relative; height: 100%; width: 100%; }
+	.event {
+		position: absolute;
+		box-sizing: border-box;
+		background: #fff;
+		border: 1px solid #d5d5d5;
+		border-left: 3px solid #4f72ad;
+		padding: 5px;
+		overflow: hidden;
+	}
+	.event h3, .event p { margin: 0; padding: 0; color: #4f72ad; font-size: .7em; }
+	.event h3 { color: #4f72ad; }
+	.event p { color: #a0a0a0; }
+
+	.legend {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		list-style: none;
+		margin: 0 5px 0 0;
+		padding: 0;
+	}
+	.legend li {
+		display: flex;
+		flex-grow: 1;
+		justify-content: flex-end;
+		align-items: center;
+		color: #646464;
+		font-weight: bold;
+		font-size: .8em;
+	}
+
+	.legend li:nth-child(2n),
+	.legend .amPm { color: #a0a0a0; font-size: .6em; text-transform: uppercase; }
+	.legend li:nth-child(2n) .amPm { display: none; }
+	.legend .amPm { margin-left: 5px; }
+</style>
+</head>
+<body>
+	<div class="day">
+		<ol class="legend"></ol>
+		<div class="schedule-container">
+			<div class="schedule"></div>
+		</div>
+	</div>
+<script src="./jquery.2.1.3.js"></script>
+<script src="./layOutDay.js"></script>
+<script>
+var events = [
+	{start: 30, end: 150},
+	{start: 540, end: 600},
+	{start: 560, end: 620},
+	{start: 610, end: 670}
+];
+layOutDay(events);
+</script>
+</body>
+</html>
